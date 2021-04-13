@@ -1,13 +1,18 @@
 package com.example.tokoku
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.tokoku.activity.LoginActivity
+import com.example.tokoku.activity.MasukActivity
 import com.example.tokoku.fragment.AkunFragment
 import com.example.tokoku.fragment.HomeFragment
 import com.example.tokoku.fragment.KeranjangFragment
@@ -30,6 +35,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var s:SharedPref
 
+    private var dariDetail: Boolean = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -37,6 +44,15 @@ class MainActivity : AppCompatActivity() {
         s = SharedPref(this)
 
         setUpBottomNav()
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(message, IntentFilter("event:keranjang"))
+    }
+
+    // menerima pemanggilan btn_toKeranjang
+    val message: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            dariDetail = true
+        }
     }
 
     fun setUpBottomNav() {
@@ -63,7 +79,7 @@ class MainActivity : AppCompatActivity() {
                     if (s.getStatusLogin()) {
                         callFragment(2, fragmentAkun)
                     } else {
-                        startActivity(Intent(this, LoginActivity::class.java))
+                        startActivity(Intent(this, MasukActivity::class.java))
                     }
                 }
             }
@@ -76,5 +92,13 @@ class MainActivity : AppCompatActivity() {
         menuItem.isChecked = true
         fm.beginTransaction().hide(active).show(fragment).commit()
         active = fragment
+    }
+
+    override fun onResume() {
+        if(dariDetail) {
+            dariDetail = false
+            callFragment(1, fragmentKeranjang)
+        }
+        super.onResume()
     }
 }

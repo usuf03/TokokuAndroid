@@ -1,17 +1,26 @@
 package com.example.tokoku.fragment
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
+import com.example.tokoku.MainActivity
 import com.example.tokoku.R
 import com.example.tokoku.adapter.AdapterProduk
 import com.example.tokoku.adapter.AdapterSlider
+import com.example.tokoku.app.ApiConfig
 import com.example.tokoku.model.Produk
+import com.example.tokoku.model.ResponModel
+import kotlinx.android.synthetic.main.activity_login.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -47,12 +56,13 @@ class HomeFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         val view: View = inflater.inflate(R.layout.fragment_home, container, false)
+        init(view)
+        getProduk()
 
-        vpSlider = view.findViewById(R.id.vp_slider)
-        rvProduk = view.findViewById(R.id.rv_produk)
-        rvProdukTerlaris = view.findViewById(R.id.rv_produkTerlaris)
-        rvElektronik = view.findViewById(R.id.rv_elektronik)
+        return view
+    }
 
+    fun displayProduk() {
         val arrSlider = ArrayList<Int>()
         arrSlider.add(R.drawable.slider1)
         arrSlider.add(R.drawable.slider2)
@@ -71,125 +81,148 @@ class HomeFragment : Fragment() {
         val layoutManager3 = LinearLayoutManager(activity)
         layoutManager3.orientation = LinearLayoutManager.HORIZONTAL
 
-        rvProduk.adapter = AdapterProduk(arrProduk)
+        rvProduk.adapter = AdapterProduk(requireActivity(), listProduk)
         rvProduk.layoutManager = layoutManager
 
-        rvProdukTerlaris.adapter = AdapterProduk(arrProdukTerlaris)
+        rvProdukTerlaris.adapter = AdapterProduk(requireActivity(), listProduk)
         rvProdukTerlaris.layoutManager = layoutManager2
 
-        rvElektronik.adapter = AdapterProduk(arrElektronik)
+        rvElektronik.adapter = AdapterProduk(requireActivity(), listProduk)
         rvElektronik.layoutManager = layoutManager3
-
-        return view
     }
 
-    val arrProduk: ArrayList<Produk>get() {
-        val arr = ArrayList<Produk>()
-        val p1 = Produk()
-        p1.nama = "HP OPPO"
-        p1.harga = "Rp. 3.500.000"
-        p1.gambar = R.drawable.hp_oppo1
+    private var listProduk: ArrayList<Produk> = ArrayList()
+    fun getProduk() {
+        ApiConfig.instanceRetrofit.getProduk().enqueue(object : Callback<ResponModel> {
+            override fun onResponse(call: Call<ResponModel>, response: Response<ResponModel>) {
+                // handel ketika berhasil
+                val res = response.body()!!
+                if(res.success == 1) {
+                    listProduk = res.produks
+                    displayProduk()
+                }
+            }
 
-        val p2 = Produk()
-        p2.nama = "HP OPPO"
-        p2.harga = "Rp. 4.500.000"
-        p2.gambar = R.drawable.hp_oppo2
-
-        val p3 = Produk()
-        p3.nama = "HP OPPO"
-        p3.harga = "Rp. 5.500.000"
-        p3.gambar = R.drawable.hp_oppo3
-
-        val p4 = Produk()
-        p4.nama = "HP OPPO"
-        p4.harga = "Rp. 6.500.000"
-        p4.gambar = R.drawable.hp_oppo4
-
-        val p5 = Produk()
-        p5.nama = "HP OPPO"
-        p5.harga = "Rp. 7.500.000"
-        p5.gambar = R.drawable.hp_oppo5
-
-        arr.add(p1)
-        arr.add(p2)
-        arr.add(p3)
-        arr.add(p4)
-        arr.add(p5)
-
-        return arr
+            override fun onFailure(call: Call<ResponModel>, t: Throwable) {
+                // handel ketika gagal
+            }
+        })
     }
 
-    val arrProdukTerlaris: ArrayList<Produk>get() {
-        val arr = ArrayList<Produk>()
-        val p1 = Produk()
-        p1.nama = "HP OPPO"
-        p1.harga = "Rp. 3.500.000"
-        p1.gambar = R.drawable.hp_oppo1
-
-        val p2 = Produk()
-        p2.nama = "HP OPPO"
-        p2.harga = "Rp. 4.500.000"
-        p2.gambar = R.drawable.hp_oppo2
-
-        val p3 = Produk()
-        p3.nama = "HP OPPO"
-        p3.harga = "Rp. 5.500.000"
-        p3.gambar = R.drawable.hp_oppo3
-
-        val p4 = Produk()
-        p4.nama = "HP OPPO"
-        p4.harga = "Rp. 6.500.000"
-        p4.gambar = R.drawable.hp_oppo4
-
-        val p5 = Produk()
-        p5.nama = "HP OPPO"
-        p5.harga = "Rp. 7.500.000"
-        p5.gambar = R.drawable.hp_oppo5
-
-        arr.add(p5)
-        arr.add(p4)
-        arr.add(p3)
-        arr.add(p2)
-        arr.add(p1)
-
-        return arr
+    fun init(view: View) {
+        vpSlider = view.findViewById(R.id.vp_slider)
+        rvProduk = view.findViewById(R.id.rv_produk)
+        rvProdukTerlaris = view.findViewById(R.id.rv_produkTerlaris)
+        rvElektronik = view.findViewById(R.id.rv_elektronik)
     }
 
-    val arrElektronik: ArrayList<Produk>get() {
-        val arr = ArrayList<Produk>()
-        val p1 = Produk()
-        p1.nama = "HP OPPO"
-        p1.harga = "Rp. 3.500.000"
-        p1.gambar = R.drawable.hp_oppo1
-
-        val p2 = Produk()
-        p2.nama = "HP OPPO"
-        p2.harga = "Rp. 4.500.000"
-        p2.gambar = R.drawable.hp_oppo2
-
-        val p3 = Produk()
-        p3.nama = "HP OPPO"
-        p3.harga = "Rp. 5.500.000"
-        p3.gambar = R.drawable.hp_oppo3
-
-        val p4 = Produk()
-        p4.nama = "HP OPPO"
-        p4.harga = "Rp. 6.500.000"
-        p4.gambar = R.drawable.hp_oppo4
-
-        val p5 = Produk()
-        p5.nama = "HP OPPO"
-        p5.harga = "Rp. 7.500.000"
-        p5.gambar = R.drawable.hp_oppo5
-
-        arr.add(p3)
-        arr.add(p5)
-        arr.add(p4)
-        arr.add(p1)
-        arr.add(p2)
-
-        return arr
-    }
+//    val arrProduk: ArrayList<Produk>get() {
+//        val arr = ArrayList<Produk>()
+//        val p1 = Produk()
+//        p1.nama = "HP OPPO"
+//        p1.harga = "Rp. 3.500.000"
+//        p1.gambar = R.drawable.hp_oppo1
+//
+//        val p2 = Produk()
+//        p2.nama = "HP OPPO"
+//        p2.harga = "Rp. 4.500.000"
+//        p2.gambar = R.drawable.hp_oppo2
+//
+//        val p3 = Produk()
+//        p3.nama = "HP OPPO"
+//        p3.harga = "Rp. 5.500.000"
+//        p3.gambar = R.drawable.hp_oppo3
+//
+//        val p4 = Produk()
+//        p4.nama = "HP OPPO"
+//        p4.harga = "Rp. 6.500.000"
+//        p4.gambar = R.drawable.hp_oppo4
+//
+//        val p5 = Produk()
+//        p5.nama = "HP OPPO"
+//        p5.harga = "Rp. 7.500.000"
+//        p5.gambar = R.drawable.hp_oppo5
+//
+//        arr.add(p1)
+//        arr.add(p2)
+//        arr.add(p3)
+//        arr.add(p4)
+//        arr.add(p5)
+//
+//        return arr
+//    }
+//
+//    val arrProdukTerlaris: ArrayList<Produk>get() {
+//        val arr = ArrayList<Produk>()
+//        val p1 = Produk()
+//        p1.nama = "HP OPPO"
+//        p1.harga = "Rp. 3.500.000"
+//        p1.gambar = R.drawable.hp_oppo1
+//
+//        val p2 = Produk()
+//        p2.nama = "HP OPPO"
+//        p2.harga = "Rp. 4.500.000"
+//        p2.gambar = R.drawable.hp_oppo2
+//
+//        val p3 = Produk()
+//        p3.nama = "HP OPPO"
+//        p3.harga = "Rp. 5.500.000"
+//        p3.gambar = R.drawable.hp_oppo3
+//
+//        val p4 = Produk()
+//        p4.nama = "HP OPPO"
+//        p4.harga = "Rp. 6.500.000"
+//        p4.gambar = R.drawable.hp_oppo4
+//
+//        val p5 = Produk()
+//        p5.nama = "HP OPPO"
+//        p5.harga = "Rp. 7.500.000"
+//        p5.gambar = R.drawable.hp_oppo5
+//
+//        arr.add(p5)
+//        arr.add(p4)
+//        arr.add(p3)
+//        arr.add(p2)
+//        arr.add(p1)
+//
+//        return arr
+//    }
+//
+//    val arrElektronik: ArrayList<Produk>get() {
+//        val arr = ArrayList<Produk>()
+//        val p1 = Produk()
+//        p1.nama = "HP OPPO"
+//        p1.harga = "Rp. 3.500.000"
+//        p1.gambar = R.drawable.hp_oppo1
+//
+//        val p2 = Produk()
+//        p2.nama = "HP OPPO"
+//        p2.harga = "Rp. 4.500.000"
+//        p2.gambar = R.drawable.hp_oppo2
+//
+//        val p3 = Produk()
+//        p3.nama = "HP OPPO"
+//        p3.harga = "Rp. 5.500.000"
+//        p3.gambar = R.drawable.hp_oppo3
+//
+//        val p4 = Produk()
+//        p4.nama = "HP OPPO"
+//        p4.harga = "Rp. 6.500.000"
+//        p4.gambar = R.drawable.hp_oppo4
+//
+//        val p5 = Produk()
+//        p5.nama = "HP OPPO"
+//        p5.harga = "Rp. 7.500.000"
+//        p5.gambar = R.drawable.hp_oppo5
+//
+//        arr.add(p3)
+//        arr.add(p5)
+//        arr.add(p4)
+//        arr.add(p1)
+//        arr.add(p2)
+//
+//        return arr
+//    }
 
     companion object {
         /**
